@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<title>Carimbo — Cartão Fidelidade Digital</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+<style>
+:root{--o:#FF6A00;--c:#121212;--b:#2a2a2a;--m:#a0a0a0;color-scheme:dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box}body{margin:0;background:#000;color:#fff;font:600 16px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif}
+#app{max-width:480px;margin:0 auto;padding:18px 18px 60px}
+.lg{font-weight:900;font-size:24px;text-align:center;margin:6px 0 16px}.lg i{font-style:normal;color:var(--o)}
+h2{font-size:22px;font-weight:900;margin:18px 0 10px;letter-spacing:-.5px}.or{color:var(--o)}.mu{color:var(--m);font-weight:500;font-size:14px}
+.card{background:var(--c);border:1px solid var(--b);border-radius:16px;padding:14px;margin:12px 0}.card.o{border:2px solid var(--o)}
+.bt{display:block;width:100%;background:var(--o);color:#000;border:0;border-radius:14px;padding:15px;font:900 16px system-ui;margin:12px 0;text-align:center;text-decoration:none}
+.bt.g{background:transparent;color:var(--o);border:2px solid var(--o)}.bt.s{width:auto;padding:9px 14px;font-size:14px;margin:0;border-radius:10px}
+label{display:block;font-size:12px;color:var(--m);text-transform:uppercase;letter-spacing:1px;margin-top:10px}
+input,select{width:100%;background:#0b0b0b;border:1px solid var(--b);color:#fff;border-radius:12px;padding:13px;font:600 16px system-ui;margin:6px 0}input:focus,select:focus{outline:2px solid var(--o)}
+.tabs{display:flex;background:var(--c);border-radius:14px;padding:4px;margin-bottom:14px}.tabs button{flex:1;background:transparent;color:var(--m);border:0;border-radius:11px;padding:12px;font:800 15px system-ui}.tabs button.on{background:var(--o);color:#000}
+.msg{border-radius:12px;padding:12px;margin:10px 0;font-size:14px}.er{background:#2a0f0f;border:1px solid #c62828}.ok{background:#0f2a12;border:1px solid #2e7d32}
+.hide{display:none}.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.tag{background:var(--o);color:#000;border-radius:8px;padding:3px 9px;font:900 11px system-ui;letter-spacing:1px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}.k{background:var(--c);border:1px solid var(--b);border-radius:14px;padding:12px}.k b{display:block;font-size:26px;color:var(--o);font-weight:900}.k span{font-size:12px;color:var(--m)}
+.row{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid var(--b);font-size:14px}.row:last-child{border:0}.row small{display:block;color:var(--m);font-weight:500}
+.row a{background:var(--o);color:#000;border-radius:10px;padding:8px 10px;font:800 12px system-ui;text-decoration:none;white-space:nowrap}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}.chips button{background:var(--c);color:#fff;border:1px solid var(--b);border-radius:12px;padding:10px 12px;font:700 13px system-ui}.chips button.on{border-color:var(--o);color:var(--o)}
+.sl{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:14px 0}.sl i{aspect-ratio:1;border-radius:50%;border:2px dashed #444;display:grid;place-items:center;font-style:normal;font-size:20px}.sl i.f{border:2px solid var(--o);background:#ff6a0022}
+.tk{border:2px dashed var(--o);border-radius:18px;padding:26px 16px;text-align:center;background:linear-gradient(160deg,#1a0d00,#000)}.tk .big{font-size:34px;font-weight:900;line-height:1.05;margin:10px 0;color:var(--o)}
+.logo{width:54px;height:54px;border-radius:16px;background:var(--o);color:#000;display:grid;place-items:center;font-size:26px;margin:0 auto}
+.cod{font-size:28px;font-weight:900;letter-spacing:4px;color:var(--o);text-align:center}
+.qr{background:#fff;padding:12px;border-radius:14px;width:fit-content;margin:12px auto}.qr svg{display:block;width:170px;height:170px}
+.pr b{color:var(--o);font-size:20px}.pr s{color:var(--m);font-weight:500}
+#t{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);color:#000;padding:12px 18px;border-radius:14px;font-weight:800;display:none;z-index:20;max-width:90%;text-align:center}
+</style></head><body><div id="app"></div><div id="t"></div>
+<script>
+const sb=supabase.createClient("https://wlawrrdguvkkiihqikyk.supabase.co","sb_publishable_YRaFxAOYo73HMKkDout6uw_9zyUcu5I");
+const $=s=>document.querySelector(s),E=s=>String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const R=v=>"R$ "+Number(v).toFixed(2).replace(".",","),N=v=>parseFloat(String(v).replace(",","."))||0,DG=s=>String(s||"").replace(/\D/g,"");
+let U,P,M,C,REC=/type=recovery/.test(location.hash),Q=new URLSearchParams(location.search).get("c"),DL=[],TI=0;
+const TPL=[["Cafeteria",10,"1 café grátis","1º café grátis"],["Barbearia",10,"1 corte grátis","1º corte com desconto"],["Academia",1,"7 dias grátis","1 aula experimental"],["Clínica",2,"Desconto na 2ª sessão","1ª avaliação grátis"],["Personalizado",5,"Seu prêmio","Seu brinde"]];
+const out=h=>{$("#app").innerHTML=h;scrollTo(0,0)};
+const toast=(t,ok)=>{const e=$("#t");e.textContent=t;e.style.background=ok?"#FF6A00":"#ef5350";e.style.display="block";setTimeout(()=>e.style.display="none",2800)};
+const msg=(id,t,ok)=>{$(id).innerHTML=t?`<div class="msg ${ok?"ok":"er"}">${E(t)}</div>`:""};
+const bar=t=>`<div class="top"><span class="tag">${t}</span><button class="bt g s" onclick="sair()">Sair</button></div>`;
+const head='<div class="lg">Carimbo<i>.</i></div>';
+function som(){try{const a=new(window.AudioContext||window.webkitAudioContext)(),o=a.createOscillator(),g=a.createGain(),t=a.currentTime;o.type="square";o.frequency.setValueAtTime(160,t);o.frequency.exponentialRampToValueAtTime(40,t+.15);g.gain.setValueAtTime(.4,t);g.gain.exponentialRampToValueAtTime(.001,t+.22);o.connect(g);g.connect(a.destination);o.start();o.stop(t+.25)}catch(e){}}
+async function sair(){await sb.auth.signOut();U=P=M=C=null;auth()}
+
+/* ---------- AUTH ---------- */
+function auth(){out(head+(Q?'<div class="card o">Entre ou crie sua conta para guardar seu cartão na carteira.</div>':'')+`
+<div class="tabs"><button id="tl" class="on" onclick="aba(0)">Entrar</button><button id="tc" onclick="aba(1)">Criar conta</button></div>
+<div id="fl"><label>E-mail</label><input id="li" type="email" autocomplete="username"><label>Senha</label><input id="ls" type="password" autocomplete="current-password"><div id="lm"></div><button class="bt" onclick="entrar()">Entrar</button><button class="bt g" onclick="esqueci()">Esqueci minha senha</button></div>
+<div id="fc" class="hide"><label>Eu sou</label><select id="pf" onchange="$('#cb').classList.toggle('hide',this.value!='dono')"><option value="cliente">Cliente</option><option value="dono">Dono de negócio</option></select>
+<label>Nome</label><input id="cn" autocomplete="name"><label>E-mail</label><input id="ce" type="email" autocomplete="email"><label>Celular com DDD</label><input id="ct" inputmode="tel" autocomplete="tel"><label>Senha (mín. 8)</label><input id="cs" type="password" autocomplete="new-password"><div id="cm"></div><button class="bt" onclick="criar()">Criar minha conta</button><div class="mu">1 conta por número de celular.</div></div>`)}
+function aba(x){$("#fl").classList.toggle("hide",!!x);$("#fc").classList.toggle("hide",!x);$("#tl").classList.toggle("on",!x);$("#tc").classList.toggle("on",!!x)}
+async function entrar(){const e=$("#li").value.trim(),s=$("#ls").value;if(!e.includes("@"))return msg("#lm","Entre com seu e-mail e senha.");
+ let r;try{r=await sb.auth.signInWithPassword({email:e.toLowerCase(),password:s})}catch(x){return msg("#lm","Falha de conexão: "+x.message)}
+ if(r.error)return msg("#lm","Erro do servidor: "+r.error.message+" (código "+(r.error.status||r.error.code||"?")+")");U=r.data.user;route()}
+async function criar(){const nome=$("#cn").value.trim(),email=$("#ce").value.trim(),tel=$("#ct").value,s=$("#cs").value,perfil=$("#pf").value;
+ if(nome.length<2||!email.includes("@")||DG(tel).length<10||s.length<8)return msg("#cm","Confira nome, e-mail, celular com DDD e senha (mín. 8).");
+ const{data,error}=await sb.auth.signUp({email,password:s,options:{data:{perfil,nome,telefone:tel}}});
+ if(error)return msg("#cm",/database/i.test(error.message)?"Este celular já tem conta ou os dados são inválidos.":error.message);
+ if(!data.session)return msg("#cm","Conta criada! Confirme pelo e-mail enviado e depois entre.",1);U=data.user;route()}
+
+async function esqueci(){const e=$("#li").value.trim();if(!e.includes("@"))return msg("#lm","Digite seu e-mail no campo acima e toque de novo.");
+ const{error}=await sb.auth.resetPasswordForEmail(e,{redirectTo:location.origin+location.pathname});
+ msg("#lm",error?error.message:"Enviamos um link para o seu e-mail. Abra o link e defina a nova senha.",!error)}
+function novaSenha(){out(head+`<h2>Nova <span class="or">senha</span></h2><label>Nova senha (mín. 8 caracteres)</label><input id="ns" type="password" autocomplete="new-password"><div id="nm2"></div><button class="bt" onclick="salvaSenha()">Salvar nova senha</button>`)}
+async function salvaSenha(){const s=$("#ns").value;if(s.length<8)return msg("#nm2","Mínimo de 8 caracteres.");
+ const{error}=await sb.auth.updateUser({password:s});if(error)return msg("#nm2",error.message);
+ REC=false;history.replaceState(null,"",location.pathname);toast("Senha atualizada!",1);U=null;route()}
+
+/* ---------- ROTAS ---------- */
+async function route(){
+ if(REC){await sb.auth.getSession();return novaSenha()}
+ if(!U){const{data}=await sb.auth.getSession();U=data.session&&data.session.user}
+ if(!U)return Q?cupom():auth();
+ const{data:p}=await sb.from("profiles").select("*").eq("id",U.id).single();P=p;
+ if(!P){toast("Perfil não encontrado. Saia e entre de novo.");return auth()}
+ if(Q)return cupom();
+ if(P.role=="dev")return dev();
+ if(P.role=="dono")return dono();
+ return cliente()}
+
+/* ---------- CUPOM PÚBLICO ---------- */
+async function cupom(){
+ const{data:c}=await sb.from("campanhas_publicas").select("*").eq("id",Q).maybeSingle();
+ if(!c){Q=null;history.replaceState(null,"",location.pathname);return route()}
+ const{data:n}=await sb.from("negocios_publicos").select("nome").eq("id",c.negocio_id).maybeSingle();
+ out(head+`<div class="tk"><div class="logo">🎁</div><div class="mu" style="margin-top:8px">${E(n?n.nome:"")}</div><div class="big">${E(c.brinde_entrada||"BRINDE")}</div><div class="mu">${c.selos_necessarios} selos = ${E(c.premio)}</div></div>
+<button class="bt" onclick="pegar()">ADICIONAR À CARTEIRA</button><div class="mu">Sem baixar app. O cupom vira cartão fidelidade com selos.</div>`)}
+async function pegar(){if(!U)return auth();const{error}=await sb.rpc("resgatar_cupom",{p_campanha:Q});if(error)return toast(error.message);
+ Q=null;history.replaceState(null,"",location.pathname);toast("Cartão adicionado!",1);cliente()}
+
+/* ---------- VALIDADOR (dono e equipe) ---------- */
+const valHtml=()=>`<h2>Validar <span class="or">selo</span></h2><div class="card o"><label>Código do cliente</label><input id="cod" autocapitalize="characters" placeholder="ex.: A1B2C3D4">
+<button class="bt" onclick="val('dar_selo')">+1 SELO</button><button class="bt g" onclick="val('validar_premio')">🎁 VALIDAR PRÊMIO</button><button class="bt g" onclick="val('validar_brinde')">☕ VALIDAR BRINDE DE ENTRADA</button><div id="vo"></div><div class="mu">Regra anti-fraude: 1 selo por cliente a cada 4 horas.</div></div>`;
+async function val(fn){const c=$("#cod").value.trim();if(!c)return msg("#vo","Digite o código.");
+ const{data,error}=await sb.rpc(fn,{p_codigo:c});if(error)return msg("#vo",error.message);som();
+ msg("#vo",fn=="dar_selo"?`Selo carimbado! ${data.selos}/${data.necessarios}`+(data.premio_liberado?" 🎉 Prêmio liberado!":""):fn=="validar_premio"?"Prêmio entregue. Cartão reiniciado.":"Brinde validado. Cupom virou cartão.",1)}
+
+/* ---------- CLIENTE ---------- */
+async function cliente(){
+ const{data:k}=await sb.from("cartoes").select("*").eq("cliente_id",U.id).order("criado_em",{ascending:false});
+ const{data:eq}=await sb.from("equipe").select("negocio_id").eq("user_id",U.id);
+ const ks=k||[];let nm={},cm={};
+ if(ks.length){const[a,b]=await Promise.all([sb.from("negocios_publicos").select("id,nome").in("id",ks.map(x=>x.negocio_id)),sb.from("campanhas_publicas").select("id,selos_necessarios,premio").in("id",ks.map(x=>x.campanha_id))]);
+  (a.data||[]).forEach(x=>nm[x.id]=x);(b.data||[]).forEach(x=>cm[x.id]=x)}
+ out(bar("CLIENTE")+`<h2>Olá, <span class="or">${E((P.nome||"").split(" ")[0])}</span> 👋</h2>`+(eq&&eq.length?valHtml():"")+`<h2>Meus <span class="or">cartões</span></h2>`+
+ (ks.length?ks.map(x=>{const c=cm[x.campanha_id]||{selos_necessarios:10,premio:"Prêmio"},n=(nm[x.negocio_id]||{}).nome||"Negócio",need=c.selos_necessarios;
+  return `<div class="card o"><b>${E(n)}</b><div class="mu">${need} selos = ${E(c.premio)}</div><div class="sl" style="grid-template-columns:repeat(${Math.min(need,5)},1fr)">${Array.from({length:need},(_,i)=>`<i class="${i<x.selos?"f":""}">${i<x.selos?"☕":""}</i>`).join("")}</div>
+  <b>${x.selos} de ${need} selos</b>${x.premios_disponiveis>0?`<div class="msg ok">🎁 Prêmio liberado: ${E(c.premio)}. Mostre no balcão!</div>`:""}${x.brinde_usado?"":'<div class="mu">Brinde de entrada ainda não usado.</div>'}
+  <div class="mu" style="margin-top:10px;text-align:center">Código para o balcão</div><div class="cod">${E(x.codigo)}</div></div>`}).join(""):'<div class="card mu">Você ainda não tem cartões. Escaneie o QR Code de um estabelecimento parceiro.</div>'))}
+
+/* ---------- DONO ---------- */
+async function dono(){
+ const{data:n}=await sb.from("negocios").select("*").eq("dono_id",U.id).limit(1);M=n&&n[0];
+ if(!M)return out(bar("DONO")+`<h2>Cadastre seu <span class="or">negócio</span></h2><label>Nome do negócio</label><input id="nn"><label>WhatsApp</label><input id="nw" inputmode="tel"><label>Instagram</label><input id="ni" placeholder="@seunegocio"><label>Endereço</label><input id="ne"><div id="nm"></div><button class="bt" onclick="criaNeg()">Salvar negócio</button>`);
+ const{data:c}=await sb.from("campanhas").select("*").eq("negocio_id",M.id).eq("ativa",true).limit(1);C=c&&c[0];
+ let h=bar("DONO")+`<h2>${E(M.nome)} <span class="or">· Painel</span></h2>`;
+ const fin=M.valor_mensal*(1-M.desconto_pct/100);
+ h+=`<div class="card pr"><span class="mu">Seu plano:</span> ${M.desconto_pct>0?`<s>${R(M.valor_mensal)}</s> `:""}<b>${R(fin)}/mês</b>${M.desconto_pct>0?`<div class="mu">Desconto de ${M.desconto_pct}%${M.desconto_obs?" · "+E(M.desconto_obs):""}</div>`:""}</div>`;
+ if(!C){h+=`<h2>Criar <span class="or">campanha</span></h2><div class="chips">${TPL.map((t,i)=>`<button onclick="tpl(${i})" class="${i==TI?"on":""}">${t[0]}</button>`).join("")}</div>
+ <label>Selos necessários</label><input id="cs1" type="number" min="1" max="50" value="${TPL[TI][1]}"><label>Prêmio</label><input id="cp" value="${E(TPL[TI][2])}"><label>Brinde de entrada (cupom)</label><input id="cb1" value="${E(TPL[TI][3])}"><div id="cmm"></div><button class="bt" onclick="criaCamp()">Criar campanha e gerar QR</button>`;return out(h)}
+ const{data:m}=await sb.rpc("metricas_negocio",{p_negocio:M.id});
+ const{data:k}=await sb.from("cartoes").select("codigo,selos,premios_disponiveis,ultimo_selo_em,criado_em,profiles(nome,telefone)").eq("negocio_id",M.id).order("criado_em",{ascending:false}).limit(100);
+ const mt=[["clientes","clientes"],["selos_dados","selos dados"],["viraram_cartao","viraram cartão"],["premios_dados","prêmios dados"],["taxa_retorno","% de retorno"],["sumidos_30d","sumidos +30 dias"]];
+ h+=`<div class="g2">${mt.map(x=>`<div class="k"><b>${m?m[x[0]]:0}</b><span>${x[1]}</span></div>`).join("")}</div>`;
+ h+=`<h2>Campanha <span class="or">ativa</span></h2><div class="card o"><b>${C.selos_necessarios} selos = ${E(C.premio)}</b><div class="mu">Brinde: ${E(C.brinde_entrada||"-")}</div><div class="qr" id="qr"></div><div class="mu" style="word-break:break-all;text-align:center" id="qu"></div><button class="bt" onclick="print()">🖨 Imprimir cartaz</button></div>`;
+ h+=valHtml();
+ h+=`<h2>Clientes <span class="or">(${(k||[]).length})</span></h2><div class="card">`+((k||[]).length?(k||[]).map(x=>{const d=Math.floor((Date.now()-new Date(x.ultimo_selo_em||x.criado_em))/864e5),f=Math.max(1,C.selos_necessarios-x.selos),p=x.profiles||{};
+  return `<div class="row"><div>${E(p.nome||"Cliente")}<small>${x.selos}/${C.selos_necessarios} selos · última visita há ${d}d${x.premios_disponiveis?" · 🎁":""}</small></div>${p.telefone?`<a target="_blank" rel="noopener" href="https://wa.me/55${DG(p.telefone)}?text=${encodeURIComponent("Oi "+(p.nome||"").split(" ")[0]+", falta só "+f+" selo"+(f>1?"s":"")+" pra você ganhar seu prêmio! ☕")}">Reativar</a>`:""}</div>`}).join(""):'<span class="mu">Nenhum cliente ainda. Imprima o QR e coloque no balcão.</span>')+`</div>`;
+ h+=`<h2>Equipe</h2><div class="card"><label>E-mail do funcionário (já cadastrado como cliente)</label><input id="fe" type="email"><div id="fm"></div><button class="bt g" onclick="addFunc()">Adicionar funcionário</button></div>`;
+ out(h);try{const u=location.origin+location.pathname+"?c="+C.id,q=qrcode(0,"M");q.addData(u);q.make();$("#qr").innerHTML=q.createSvgTag(4,0);$("#qu").textContent=u}catch(e){}}
+function tpl(i){TI=i;dono()}
+async function criaNeg(){const nome=$("#nn").value.trim();if(nome.length<2)return msg("#nm","Informe o nome do negócio.");
+ const slug=nome.toLowerCase().normalize("NFD").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"")+"-"+Math.random().toString(36).slice(2,6);
+ const{error}=await sb.from("negocios").insert({dono_id:U.id,nome,slug,whatsapp:$("#nw").value,instagram:$("#ni").value,endereco:$("#ne").value});
+ if(error)return msg("#nm",error.message);dono()}
+async function criaCamp(){const sel=parseInt($("#cs1").value),pr=$("#cp").value.trim();if(!(sel>=1)||!pr)return msg("#cmm","Informe selos e prêmio.");
+ const{error}=await sb.from("campanhas").insert({negocio_id:M.id,nome:TPL[TI][0],modelo:TPL[TI][0].toLowerCase(),selos_necessarios:sel,premio:pr,brinde_entrada:$("#cb1").value.trim()});
+ if(error)return msg("#cmm",error.message);dono()}
+async function addFunc(){const e=$("#fe").value.trim();if(!e)return;const{error}=await sb.rpc("adicionar_funcionario",{p_negocio:M.id,p_email:e});msg("#fm",error?error.message:"Funcionário adicionado!",!error)}
+
+/* ---------- DESENVOLVEDOR ---------- */
+async function dev(){out(bar("MODO DESENVOLVEDOR")+`<div class="card o"><b>Valor base mensal (novas empresas)</b><div class="g2"><div><label>R$ por mês</label><input id="vb" inputmode="decimal" placeholder="49,00"></div><div style="align-self:end"><button class="bt s" style="width:100%;padding:14px" onclick="base()">Salvar</button></div></div></div>
+<h2>Empresas e <span class="or">descontos</span></h2><label>Buscar por e-mail ou nome</label><input id="bq" type="search" placeholder="dono@exemplo.com" oninput="lista()"><div class="card" id="lst"></div><div id="ed"></div>`);lista()}
+async function lista(){const{data,error}=await sb.rpc("dev_listar_negocios",{p_busca:($("#bq")||{}).value||""});if(error)return $("#lst").innerHTML=`<span class="mu">${E(error.message)}</span>`;DL=data||[];
+ $("#lst").innerHTML=DL.length?DL.map((x,i)=>`<div class="row" onclick="abre(${i})" style="cursor:pointer"><div><b>${E(x.r_nome)}</b><small>${E(x.r_email)}</small></div><div class="pr" style="text-align:right">${x.r_desconto_pct>0?`<s>${R(x.r_valor_mensal)}</s><br>`:""}<b>${R(x.r_valor_final)}</b></div></div>`).join(""):'<span class="mu">Nenhuma empresa encontrada.</span>'}
+function abre(i){const x=DL[i];$("#ed").innerHTML=`<div class="card o"><b>${E(x.r_nome)}</b
