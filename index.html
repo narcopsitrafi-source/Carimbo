@@ -31,8 +31,9 @@ input,select{width:100%;background:#0b0b0b;border:1px solid var(--b);color:#fff;
 .qr{background:#fff;padding:12px;border-radius:14px;width:fit-content;margin:12px auto}.qr svg{display:block;width:170px;height:170px}
 .pr b{color:var(--o);font-size:20px}.pr s{color:var(--m);font-weight:500}
 #t{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);color:#000;padding:12px 18px;border-radius:14px;font-weight:800;display:none;z-index:20;max-width:90%;text-align:center}
-</style></head><body><div id="app"></div><div id="t"></div>
+</style></head><body><div id="app"><div class="lg">Carimbo<i>.</i></div><p class="mu" style="text-align:center">Carregando…</p></div><div id="t"></div>
 <script>
+window.onerror=function(m){var d=document.createElement("div");d.className="msg er";d.textContent="Erro no app: "+m;document.getElementById("app").appendChild(d)};
 const sb=supabase.createClient("https://wlawrrdguvkkiihqikyk.supabase.co","sb_publishable_YRaFxAOYo73HMKkDout6uw_9zyUcu5I");
 const $=s=>document.querySelector(s),E=s=>String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const R=v=>"R$ "+Number(v).toFixed(2).replace(".",","),N=v=>parseFloat(String(v).replace(",","."))||0,DG=s=>String(s||"").replace(/\D/g,"");
@@ -146,5 +147,4 @@ async function addFunc(){const e=$("#fe").value.trim();if(!e)return;const{error}
 async function dev(){out(bar("MODO DESENVOLVEDOR")+`<div class="card o"><b>Valor base mensal (novas empresas)</b><div class="g2"><div><label>R$ por mês</label><input id="vb" inputmode="decimal" placeholder="49,00"></div><div style="align-self:end"><button class="bt s" style="width:100%;padding:14px" onclick="base()">Salvar</button></div></div></div>
 <h2>Empresas e <span class="or">descontos</span></h2><label>Buscar por e-mail ou nome</label><input id="bq" type="search" placeholder="dono@exemplo.com" oninput="lista()"><div class="card" id="lst"></div><div id="ed"></div>`);lista()}
 async function lista(){const{data,error}=await sb.rpc("dev_listar_negocios",{p_busca:($("#bq")||{}).value||""});if(error)return $("#lst").innerHTML=`<span class="mu">${E(error.message)}</span>`;DL=data||[];
- $("#lst").innerHTML=DL.length?DL.map((x,i)=>`<div class="row" onclick="abre(${i})" style="cursor:pointer"><div><b>${E(x.r_nome)}</b><small>${E(x.r_email)}</small></div><div class="pr" style="text-align:right">${x.r_desconto_pct>0?`<s>${R(x.r_valor_mensal)}</s><br>`:""}<b>${R(x.r_valor_final)}</b></div></div>`).join(""):'<span class="mu">Nenhuma empresa encontrada.</span>'}
-function abre(i){const x=DL[i];$("#ed").innerHTML=`<div class="card o"><b>${E(x.r_nome)}</b
+ $("#lst").innerHTML=DL.length?DL.map((x,i)=>`<div class="row" onclick="abre(${i})" style="cursor:pointer"><div><b>${E(x.r_nome)}</b><small>${E(x.r_email)}</small></div><div class="pr" style="text-align:right">${
